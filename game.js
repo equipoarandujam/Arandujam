@@ -5,7 +5,17 @@ const escenas = {
         nombre: "",
         texto: "Un objeto valioso ha sido robado...",
         opciones: [
-            { texto: "Comenzar investigación", siguiente: "luison" }
+            { texto: "QUIEN TOMO MI CAÑA", siguiente: "investigacion" }
+        ]
+    },
+
+    investigacion: {
+        fondo: "img/fondos/fondo.jpg",
+        personaje: "",
+        nombre: "",
+        texto: "Empezás a recorrer la zona en busca de pistas. Nadie aparece todavía.",
+        opciones: [
+            
         ]
     },
 
@@ -324,6 +334,8 @@ function mostrarEscena(id) {
         const btn = document.createElement("button");
         btn.textContent = op.texto;
         btn.onclick = () => mostrarEscena(op.siguiente);
+        // aplicar clase para opciones principales (se verán como botones grandes)
+        btn.classList.add('option-button');
         choices.appendChild(btn);
     });
 
