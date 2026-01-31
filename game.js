@@ -54,7 +54,7 @@ const escenas = {
         fondo: "img/fondos/fondo.jpg",
         personaje: "",
         nombre: "",
-        texto: "Atrapaste al ladrón, isterio fue resuelto.",
+        texto: "Atrapaste al ladrón,isterio fue resuelto.",
         opciones: []
     },
 
@@ -68,78 +68,205 @@ const escenas = {
 };
 // Lista de personajes disponible globalmente
 const personajes = [
-    { nombre: "Luisón", imagen: "img/personajes/personaje1.png", pista: "Vi a Carlos cerca del objeto.", culpable: false, escena: "luison" },
-    { nombre: "Malavisión", imagen: "img/personajes/personaje2.png", pista: "El objeto ya estaba vacío cuando lo vi.", culpable: true, escena: "malavision" }
+    { 
+        nombre: "Luisón", 
+        imagen: "img/personajes/personaje1.png", 
+        pista: "Vi a Carlos cerca del objeto.", 
+        culpable: false, 
+        escena: "luison",
+        preguntas: [
+            { pregunta: "¿Dónde estabas la noche del robo?", respuesta: "Estaba en mi casa, con mi familia. No vi nada raro.", efecto: () => { if (typeof estado !== 'undefined') estado.interrogaronLuison = true; } },
+            { pregunta: "¿Viste a alguien cerca?", respuesta: "Vi a Malavisión por la plaza esa noche.", efecto: null }
+        ]
+    },
+    { 
+        nombre: "Malavisión", 
+        imagen: "img/personajes/personaje2.png", 
+        pista: "El objeto ya estaba vacío cuando lo vi.", 
+        culpable: true, 
+        escena: "malavision",
+        preguntas: [
+            { pregunta: "¿Qué hacías allí?", respuesta: "Solo pasaba por la zona, no me metí en nada.", efecto: () => { if (typeof estado !== 'undefined') estado.interrogaronMalavision = true; } },
+            { pregunta: "¿Conoces al dueño del objeto?", respuesta: "No, nunca lo vi antes.", efecto: null }
+        ]
+    },
+    {
+        nombre: "Moñai",
+        imagen: "img/personajes/personaje3.png",
+        pista: "Tenía una bolsa y miraba alrededor.",
+        culpable: false,
+        escena: "moñai",
+        preguntas: [
+            { pregunta: "¿Por qué estabas en ese lugar?", respuesta: "Buscaba una planta medicinal para mi abuela; no tenía nada que ver con eso.", efecto: () => { if (typeof estado !== 'undefined') estado.interrogaronMonai = true; } },
+            { pregunta: "¿Viste algo sospechoso?", respuesta: "Vi a alguien con una capa correr hacia el río, pero no distingo rostros.", efecto: null },
+            { pregunta: "¿Tienes una coartada?", respuesta: "Mi vecino me vio pasar por su patio; él puede confirmarlo.", efecto: null }
+        ]
+    },
 ];
 
 // Conectar botones persistentes (si existen) para interrogar y acusar
 function setupControls() {
     // Los botones se crean dinámicamente en mostrarEscena, así que no hacemos nada aquí
 }
-function mostrarSospechosos() {
-    const scene = document.getElementById("scene");
-    const options = document.getElementById("options");
+// Guarda la escena actual para poder restaurar los controles
+let currentScene = 'inicio';
 
-    scene.style.display = 'flex';
-    scene.innerHTML = "<h2>¿A quién querés interrogar?</h2>";
-    options.innerHTML = "";
-    options.style.display = 'flex';
+// Renderiza los botones persistentes (Interrogar / Acusar) dentro de #controls
+function renderMainControls() {
+    const controls = document.getElementById('controls');
+    if (!controls) return;
+
+    if (currentScene === 'inicio') {
+        controls.innerHTML = '';
+        return;
+    }
+
+    controls.innerHTML = `
+        <button id="btnInterrogar">Interrogar</button>
+        <button id="btnAcusar">Acusar</button>
+    `;
+
+    const btnI = document.getElementById('btnInterrogar');
+    const btnA = document.getElementById('btnAcusar');
+    if (btnI) btnI.addEventListener('click', mostrarSospechosos);
+    if (btnA) btnA.addEventListener('click', elegirCulpable);
+    // Ajustar posición de los controles para que no se solapen con el diálogo/personaje
+}
+function mostrarSospechosos() {
+    // Mostrar la lista dentro del mismo contenedor de controles
+    const controls = document.getElementById('controls');
+    if (!controls) return;
+
+    controls.innerHTML = '';
 
     personajes.forEach((p, index) => {
-        const btn = document.createElement("button");
+        const btn = document.createElement('button');
         btn.textContent = p.nombre;
-        btn.onclick = () => {
-            console.log("Click en:", p.nombre);
-            interrogar(index);
-        };
-        options.appendChild(btn);
+        btn.onclick = () => interrogar(index);
+        controls.appendChild(btn);
     });
-    
-    // Agregar botón de cerrar/volver
-    const btnVolver = document.createElement("button");
-    btnVolver.textContent = "Volver";
-    btnVolver.onclick = () => {
-        scene.style.display = 'none';
-        options.style.display = 'none';
-    };
-    options.appendChild(btnVolver);
+
+    // botón volver que restaura Interrogar/Acusar
+    const btnVolver = document.createElement('button');
+    btnVolver.textContent = 'Volver';
+    btnVolver.addEventListener('click', () => renderMainControls());
+    controls.appendChild(btnVolver);
+    // ajustar controles tras cambiar su contenido
 }
 function interrogar(index) {
     const p = personajes[index];
-    const scene = document.getElementById("scene");
-    const options = document.getElementById("options");
+    const controls = document.getElementById('controls');
+    const char = document.getElementById('character');
+    const nameEl = document.getElementById('name');
+    const textEl = document.getElementById('text');
 
-    // Cerrar el modal de interrogar
-    scene.style.display = 'none';
-    options.style.display = 'none';
-    
-    // Ir a la escena del personaje
-    mostrarEscena(p.escena);
+    // mostrar personaje y nombre
+    if (p.imagen) { char.src = p.imagen; char.style.display = 'block'; }
+    nameEl.textContent = p.nombre;
+    textEl.textContent = '';
+
+    // listar preguntas como botones dentro de controls
+    if (!controls) return;
+    controls.innerHTML = '';
+
+    if (Array.isArray(p.preguntas) && p.preguntas.length) {
+        p.preguntas.forEach((q, qi) => {
+            const btn = document.createElement('button');
+            btn.textContent = q.pregunta;
+            btn.addEventListener('click', () => {
+                textEl.textContent = q.respuesta;
+                if (q.efecto && typeof q.efecto === 'function') q.efecto();
+                // opcional: destacar botón seleccionado
+                // limpiar selección previa
+                Array.from(controls.querySelectorAll('button')).forEach(b=> b.classList.remove('selected'));
+                btn.classList.add('selected');
+            });
+            controls.appendChild(btn);
+        });
+    } else {
+        const msg = document.createElement('div');
+        msg.textContent = 'No hay preguntas disponibles.';
+        msg.style.color = '#ccc';
+        controls.appendChild(msg);
+    }
+
+    // botón volver para restaurar controles principales
+    const btnVolver = document.createElement('button');
+    btnVolver.textContent = 'Volver';
+    btnVolver.addEventListener('click', () => {
+        renderMainControls();
+        // opcional: restaurar texto de la escena actual
+    });
+    controls.appendChild(btnVolver);
+
+    // reajustar posición de controles
+    adjustControlsPosition();
 }
 function elegirCulpable() {
-    const scene = document.getElementById("scene");
-    const options = document.getElementById("options");
+    // Mostrar la lista de acusar dentro de #controls
+    const controls = document.getElementById('controls');
+    if (!controls) return;
 
-    scene.style.display = 'flex';
-    options.style.display = 'flex';
-    scene.innerHTML = "<h2>¿A quién quieres acusar?</h2>";
-    options.innerHTML = "";
+    controls.innerHTML = '';
 
     personajes.forEach(p => {
-        const btn = document.createElement("button");
+        const btn = document.createElement('button');
         btn.textContent = p.nombre;
         btn.onclick = () => final(p.culpable);
-        options.appendChild(btn);
+        controls.appendChild(btn);
     });
-    
-    // Agregar botón de cerrar/volver
-    const btnVolver = document.createElement("button");
-    btnVolver.textContent = "Volver";
-    btnVolver.onclick = () => {
-        scene.style.display = 'none';
-        options.style.display = 'none';
-    };
-    options.appendChild(btnVolver);
+
+    const btnVolver = document.createElement('button');
+    btnVolver.textContent = 'Volver';
+    btnVolver.addEventListener('click', () => renderMainControls());
+    controls.appendChild(btnVolver);
+    // ajustar controles tras cambiar su contenido
+}
+
+
+
+// En pantallas pequeñas, posicionar el diálogo entre el personaje y los controles
+function adjustLayoutForMobile() {
+    const dialogue = document.getElementById('dialogue');
+    const character = document.getElementById('character');
+    const controls = document.getElementById('controls');
+    if (!dialogue || !character || !controls) return;
+
+    const mobileMax = 480; // px
+    if (window.innerWidth > mobileMax) return; // solo aplicar en móviles
+    if (character.style.display === 'none') return;
+
+    const gap = 12; // espacio entre personaje y diálogo
+    const charRect = character.getBoundingClientRect();
+    const dialogRect = dialogue.getBoundingClientRect();
+
+    // calcular top deseado del diálogo (desde la parte superior de la ventana)
+    const desiredDialogTop = charRect.top + charRect.height + gap;
+    // calcular top y aplicar usando top (evita conflictos con bottom)
+    const topPx = Math.round(desiredDialogTop);
+    dialogue.style.top = topPx + 'px';
+    dialogue.style.removeProperty('bottom');
+
+    // asegurarse que los controles queden debajo del diálogo
+    // posicionar controles explícitamente en móvil (usar top, no bottom)
+    const gapBetween = 12;
+    // recalcular rect del diálogo después de aplicar top
+    const newDialogRect = dialogue.getBoundingClientRect();
+    const controlsRect = controls.getBoundingClientRect();
+    const controlsHeight = Math.round(controlsRect.height) || 0;
+
+    let desiredControlsTop = Math.round(newDialogRect.bottom + gapBetween);
+
+    // si los controles se salen de la pantalla, ajustarlos y mover diálogo si hace falta
+    if (desiredControlsTop + controlsHeight > window.innerHeight - 8) {
+        desiredControlsTop = window.innerHeight - controlsHeight - 8;
+        const newDialogTop = Math.max(8, Math.round(desiredControlsTop - newDialogRect.height - gapBetween));
+        dialogue.style.top = newDialogTop + 'px';
+    }
+
+    // aplicar top a controles y eliminar bottom
+    controls.style.top = desiredControlsTop + 'px';
+    controls.style.removeProperty('bottom');
 }
 
 function final(acierto) {
@@ -202,19 +329,9 @@ function mostrarEscena(id) {
 
     // Mostrar botones de Interrogar/Acusar solo si NO es la escena de inicio
     const controls = document.getElementById("controls");
-    if (id === 'inicio') {
-        controls.innerHTML = "";
-    } else {
-        controls.innerHTML = `
-            <button id="btnInterrogar">Interrogar</button>
-            <button id="btnAcusar">Acusar</button>
-        `;
-        // Reconectar listeners después de crear los botones
-        const btnI = document.getElementById('btnInterrogar');
-        const btnA = document.getElementById('btnAcusar');
-        if (btnI) btnI.addEventListener('click', mostrarSospechosos);
-        if (btnA) btnA.addEventListener('click', elegirCulpable);
-    }
+    // actualizar escena actual y renderizar controles
+    currentScene = id;
+    renderMainControls();
 }
 
 window.addEventListener('DOMContentLoaded', () => {
