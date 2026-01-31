@@ -13,7 +13,7 @@ const escenas = {
         fondo: "img/fondos/fondo.jpg",
         personaje: "img/personajes/personaje1.png",
         nombre: "Luisón",
-        texto: "Yo vi a Carlos cerca del objeto.",
+        texto: "Yo vi a Malavisión cerca del objeto.",
         efecto: () => { if (typeof estado !== 'undefined') estado.pistaAna = true; },
         opciones: [
         ]
@@ -54,7 +54,7 @@ const escenas = {
         fondo: "img/fondos/fondo.jpg",
         personaje: "",
         nombre: "",
-        texto: "Atrapaste al ladrón. El misterio fue resuelto.",
+        texto: "Atrapaste al ladrón, isterio fue resuelto.",
         opciones: []
     },
 
@@ -150,9 +150,9 @@ function final(acierto) {
     options.style.display = 'flex';
 
     if (acierto) {
-        scene.innerHTML = "<h2>✓ Atrapaste al ladrón</h2><p style='color:#0f0; font-size:1.2em;'>El misterio fue resuelto.</p>";
+        scene.innerHTML = "<h2>Atrapaste al ladrón</h2><p style='color:#0f0; font-size:1.2em;'>El misterio fue resuelto.</p>";
     } else {
-        scene.innerHTML = "<h2>✗ El objeto estaba vacío...</h2><p style='color:#f00; font-size:1.2em;'>No fue el culpable.</p>";
+        scene.innerHTML = "<h2>El objeto estaba vacío</h2><p style='color:#f00; font-size:1.2em;'>No fue el culpable.</p>";
     }
 
     options.innerHTML = "";
