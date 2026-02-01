@@ -1,4 +1,43 @@
+
 const escenas = {
+    "1am_cerro_yaguaron": {
+        fondo: "img/fondos/estanque.png", // Asegúrate de que la imagen exista
+        personaje: "",
+        nombre: "Narrador",
+        texto: "–Estabas durmiendo placidamente entre los yuyales cercanos del Ykua, un cielo estrellado adornaba la noche y el silencio del lugar te hacía sentir seguro.\n\n–De repente un ruido extraño entre las plantas hace que te despiertes, confundido miras a todos lados y te das cuenta de que tu ración de Caña y Miel no están.\n\n–Te acercas al agua y notas a un ente enmascarado corriendo hacia el otro lado del estanque.",
+        opciones: [
+            { texto: "¿Quién es ese?", siguiente: "pombero_sorprendido" }
+        ]
+    },
+    pombero_sorprendido: {
+        fondo: "img/fondos/estanque.png", // O el fondo que prefieras
+        personaje: "img/personajes/pombero_sorprendido.png", // Asegúrate de que la imagen exista
+        nombre: "Pombero",
+        texto: "–¿Qué pasó acá?\n–De seguro esos ñembotavy ya otra vez me están rompiendo las bolas, voy a ir a hablar con ellos.",
+        opciones: [
+            { texto: "Continuar", siguiente: "escena_perros_montes" }
+        ]
+    },
+
+    escena_perros_montes: {
+        fondo: "img/fondos/fondo_monte.png", // Cambia el fondo si tienes uno específico
+        personaje: "",
+        nombre: "Narrador",
+        texto: "De repente escuchás perros ladrando a lo lejos, donde hay algunas casas casi al final del monte, al dar la vuelta para curiosear, podés ver algo que brilla, como una luz o un reflejo, así que decidís ir hacia ahí.",
+        opciones: [
+            { texto: "Acercarse", siguiente: "moñai_dialogo" }
+        ]
+    },
+
+    moñai_dialogo: {
+        fondo: "img/fondos/fondo_monte.png", // Cambia el fondo si tienes uno específico
+        personaje: "img/personajes/moñai.png", // Cambia si tienes una imagen específica de Moñái
+        nombre: "Moñái",
+        texto: "–Por vos hina ladran ya otra vez los perros, yo quería saber por donde ya otra vez andabas, algo te pasó por eso venís hacia acá ¿Qué querés?",
+        opciones: [
+            { texto: "Responder", siguiente: "inicio" }
+        ]
+    },
     inicio: {
         fondo: "img/fondos/fondo.jpg",
         personaje: "",
@@ -16,36 +55,6 @@ const escenas = {
         texto: "Empezás a recorrer la zona en busca de pistas. Nadie aparece todavía.",
         opciones: [
             
-        ]
-    },
-
-    luison: {
-        fondo: "img/fondos/fondo.jpg",
-        personaje: "img/personajes/personaje1.png",
-        nombre: "Luisón",
-        texto: "Yo vi a Malavisión cerca del objeto.",
-        efecto: () => { if (typeof estado !== 'undefined') estado.pistaAna = true; },
-        opciones: [
-        ]
-    },
-
-    malavision: {
-        fondo: "img/fondos/fondo.jpg",
-        personaje: "img/personajes/personaje2.png",
-        nombre: "Malavisión",
-        texto: "El objeto ya estaba vacío cuando lo vi.",
-        efecto: () => { if (typeof estado !== 'undefined') estado.pistaCarlos = true; },
-        opciones: [
-        ]
-    },
-    moñai: {
-        fondo: "img/fondos/fondo.jpg",
-        personaje: "img/personajes/personaje1.png",
-        nombre: "Moñai",
-        texto: "El objeto ya estaba vacío cuando lo vi.",
-        efecto: () => { if (typeof estado !== 'undefined') estado.pistaCarlos = true; },
-        opciones: [
-            { texto: "Acusar", siguiente: "acusar" }
         ]
     },
 
@@ -116,6 +125,19 @@ const personajes = [
             { pregunta: "¿Tienes una coartada?", respuesta: "Mi vecino me vio pasar por su patio; él puede confirmarlo.", efecto: null }
         ]
     },
+    {
+        nombre: "Jasyjatere",
+        fondo: "img/fondos/fondo_moñai.png",
+        imagen: "img/personajes/jasyjatere.png",
+        pista: "",
+        culpable: false,
+        escena: "jasyjatere",
+        preguntas: [
+            { pregunta: "¿Por qué estabas en ese lugar?", respuesta: "Buscaba una planta medicinal para mi abuela; no tenía nada que ver con eso.", efecto: () => { if (typeof estado !== 'undefined') estado.interrogaronMonai = true; } },
+            { pregunta: "¿Viste algo sospechoso?", respuesta: "Vi a alguien con una capa correr hacia el río, pero no distingo rostros.", efecto: null },
+            { pregunta: "¿Tienes una coartada?", respuesta: "Mi vecino me vio pasar por su patio; él puede confirmarlo.", efecto: null }
+        ]
+    },
 ];
 
 // Conectar botones persistentes (si existen) para interrogar y acusar
@@ -123,7 +145,7 @@ function setupControls() {
     // Los botones se crean dinámicamente en mostrarEscena, así que no hacemos nada aquí
 }
 // Guarda la escena actual para poder restaurar los controles
-let currentScene = 'inicio';
+let currentScene = '1am_cerro_yaguaron';
 
 // Duración de las transiciones (ms) — mantener sincronizada con CSS
 const TRANSITION_MS = 360;
@@ -210,7 +232,10 @@ function renderMainControls() {
         return;
     }
 
-    if (currentScene === 'inicio') {
+    // Solo mostrar los controles en escenas permitidas
+    // Por ejemplo, solo después de 'investigacion' (puedes agregar más escenas si lo deseas)
+    const escenasConControles = ['investigacion'];
+    if (!escenasConControles.includes(currentScene)) {
         controls.innerHTML = '';
         return;
     }
@@ -220,10 +245,22 @@ function renderMainControls() {
         <button id="btnAcusar">Acusar</button>
     `;
 
+    // Al volver a los controles principales, bajar la caja de diálogo
+    const dialogue = document.getElementById('dialogue');
+    if (dialogue) dialogue.classList.remove('dialogue-up');
+
     const btnI = document.getElementById('btnInterrogar');
     const btnA = document.getElementById('btnAcusar');
-    if (btnI) btnI.addEventListener('click', mostrarSospechosos);
-    if (btnA) btnA.addEventListener('click', elegirCulpable);
+    if (btnI) btnI.addEventListener('click', () => {
+        const dialogue = document.getElementById('dialogue');
+        if (dialogue) dialogue.classList.add('dialogue-up');
+        mostrarSospechosos();
+    });
+    if (btnA) btnA.addEventListener('click', () => {
+        const dialogue = document.getElementById('dialogue');
+        if (dialogue) dialogue.classList.add('dialogue-up');
+        elegirCulpable();
+    });
     // Ajustar posición de los controles para que no se solapen con el diálogo/personaje
 }
 function mostrarSospechosos() {
@@ -243,7 +280,12 @@ function mostrarSospechosos() {
     // botón volver que restaura Interrogar/Acusar
     const btnVolver = document.createElement('button');
     btnVolver.textContent = 'Volver';
-    btnVolver.addEventListener('click', () => renderMainControls());
+    btnVolver.addEventListener('click', () => {
+        // Al volver, bajar la caja de diálogo
+        const dialogue = document.getElementById('dialogue');
+        if (dialogue) dialogue.classList.remove('dialogue-up');
+        renderMainControls();
+    });
     controls.appendChild(btnVolver);
     // ajustar controles tras cambiar su contenido
 }
@@ -288,7 +330,6 @@ function transitionSceneUpdate(updateFn) {
         setTimeout(() => {
             elems.forEach(el => el.classList.remove('fade-hidden'));
             adjustLayoutForMobile();
-            adjustControlsPosition();
         }, 30);
     }, TRANSITION_MS);
 }
@@ -315,6 +356,9 @@ function interrogar(index) {
         // cancelar y limpiar texto antes de escribir
         cancelTyping();
         textEl.textContent = '';
+
+        // SUBIR la caja de diálogo para que no se solape
+        if (dialogue) dialogue.classList.add('dialogue-up');
 
         // listar preguntas como botones dentro de controls
         if (!controls) return;
@@ -347,12 +391,12 @@ function interrogar(index) {
         btnVolver.textContent = 'Volver';
         btnVolver.addEventListener('click', () => {
             renderMainControls();
-            // opcional: restaurar texto de la escena actual
+            // restaurar la posición de la caja de diálogo
+            if (dialogue) dialogue.classList.remove('dialogue-up');
         });
         controls.appendChild(btnVolver);
 
         // reajustar posición de controles
-        adjustControlsPosition();
     });
 }
 function elegirCulpable() {
@@ -511,14 +555,28 @@ function mostrarEscena(id) {
             elems.forEach(el => el.classList.remove('fade-hidden'));
             // reajustar layout si es necesario
             adjustLayoutForMobile();
-            adjustControlsPosition();
         }, 30);
 
     }, 360);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-    mostrarEscena('inicio');
+
+    // Sonido de ambiente
+    const ambiente = new Audio('audio/ambiente.mp3');
+    ambiente.loop = true;
+    ambiente.volume = 0.5; // Puedes ajustar el volumen
+    // Reproducir al cargar (algunos navegadores requieren interacción)
+    ambiente.play().catch(() => {
+        // Si el navegador bloquea la reproducción automática, reproducir al primer click
+        const playOnUserGesture = () => {
+            ambiente.play();
+            window.removeEventListener('click', playOnUserGesture);
+        };
+        window.addEventListener('click', playOnUserGesture);
+    });
+
+    mostrarEscena('1am_cerro_yaguaron');
     setupControls();
 });
 
