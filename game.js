@@ -460,7 +460,7 @@ const escenas = {
     },
     final_bueno: {
         fondo: "img/fondos/fondo_bueno.png",
-        personaje: "img/personajes/jasy.png",
+        personaje: "img/personajes/jasy_mascara.png",
         nombre: "Final",
         texto: "ENCONTRASTE AL LADRÓN",
         opciones: [
