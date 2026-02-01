@@ -61,27 +61,28 @@ const escenas = {
     },
 
     final_bueno: {
-        fondo: "img/fondos/fondo.jpg",
-        personaje: "",
-        nombre: "",
-        texto: "Atrapaste al ladrón,isterio fue resuelto.",
-        opciones: []
+            fondo: "img/fondos/final_bueno.png",
+            personaje: "",
+            nombre: "Final",
+            texto: "Atrapaste al ladrón. El misterio fue resuelto.",
+            opciones: []
     },
 
     final_malo: {
-        fondo: "img/fondos/fondo.jpg",
-        personaje: "",
-        nombre: "",
-        texto: "El objeto aparece... vacío.",
-        opciones: []
+            fondo: "img/fondos/final_malo.png",
+            personaje: "",
+            nombre: "Final",
+            texto: "El objeto aparece... vacío. Te equivocaste de acusado.",
+            opciones: []
     }
 };
 // Lista de personajes disponible globalmente
 const personajes = [
     { 
         nombre: "Luisón", 
+        fondo: "img/fondos/fondo_luison.png",
         imagen: "img/personajes/personaje1.png", 
-        pista: "Vi a Carlos cerca del objeto.", 
+        pista: "", 
         culpable: false, 
         escena: "luison",
         preguntas: [
@@ -90,9 +91,11 @@ const personajes = [
         ]
     },
     { 
-        nombre: "Malavisión", 
+        
+        nombre: "Malavisión",
+        fondo: "img/fondos/fondo_malavision.png", 
         imagen: "img/personajes/personaje2.png", 
-        pista: "El objeto ya estaba vacío cuando lo vi.", 
+        pista: "", 
         culpable: true, 
         escena: "malavision",
         preguntas: [
@@ -102,8 +105,9 @@ const personajes = [
     },
     {
         nombre: "Moñai",
+        fondo: "img/fondos/fondo_moñai.png",
         imagen: "img/personajes/personaje3.png",
-        pista: "Tenía una bolsa y miraba alrededor.",
+        pista: "",
         culpable: false,
         escena: "moñai",
         preguntas: [
@@ -121,10 +125,90 @@ function setupControls() {
 // Guarda la escena actual para poder restaurar los controles
 let currentScene = 'inicio';
 
+// Duración de las transiciones (ms) — mantener sincronizada con CSS
+const TRANSITION_MS = 360;
+
+// Máquina de escribir: control de estado para poder cancelar
+let _currentTyping = null;
+function cancelTyping() {
+    if (_currentTyping) { clearTimeout(_currentTyping); _currentTyping = null; }
+}
+
+// Typewriter audio (WebAudio synth) — no archivos necesarios
+let _audioCtx = null;
+let typeSoundEnabled = true; // controlar reproducción
+function initTypeAudio() {
+    if (_audioCtx) return;
+    try {
+        _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // resume on some browsers
+        _audioCtx.resume().catch(()=>{});
+    } catch (e) {
+        _audioCtx = null;
+    }
+}
+
+function playTypeSound() {
+    if (!typeSoundEnabled) return;
+    try {
+        if (!_audioCtx) initTypeAudio();
+        if (!_audioCtx) return;
+        const now = _audioCtx.currentTime;
+        const osc = _audioCtx.createOscillator();
+        const gain = _audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.value = 320 + Math.random() * 120; // slight variation
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.03, now + 0.001);
+        gain.gain.linearRampToValueAtTime(0.001, now + 0.04);
+        osc.connect(gain);
+        gain.connect(_audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.06);
+    } catch (e) {
+        // ignore audio errors
+    }
+}
+
+function typeWriter(el, text, speed = 20, callback) {
+    if (!el) { if (callback) callback(); return; }
+    cancelTyping();
+    el.textContent = '';
+    el.classList.add('typewriter');
+    let i = 0;
+
+    function step() {
+        el.textContent += text.charAt(i);
+        // reproducir sonido por carácter
+        playTypeSound();
+        i++;
+        if (i < text.length) {
+            _currentTyping = setTimeout(step, speed);
+        } else {
+            _currentTyping = null;
+            // mantener caret unos instantes
+            setTimeout(() => el.classList.remove('typewriter'), 300);
+            if (callback) callback();
+        }
+    }
+
+    // comenzar inmediatamente
+    _currentTyping = setTimeout(step, speed);
+}
+
 // Renderiza los botones persistentes (Interrogar / Acusar) dentro de #controls
 function renderMainControls() {
     const controls = document.getElementById('controls');
     if (!controls) return;
+    // Si es una escena final, mostrar solo Reiniciar
+    if (currentScene && (currentScene === 'final_bueno' || currentScene === 'final_malo' || currentScene.startsWith('final'))) {
+        controls.innerHTML = `
+            <button id="btnReiniciar">Reiniciar</button>
+        `;
+        const btnR = document.getElementById('btnReiniciar');
+        if (btnR) btnR.addEventListener('click', () => mostrarEscena('inicio'));
+        return;
+    }
 
     if (currentScene === 'inicio') {
         controls.innerHTML = '';
@@ -163,6 +247,51 @@ function mostrarSospechosos() {
     controls.appendChild(btnVolver);
     // ajustar controles tras cambiar su contenido
 }
+// Cambia el personaje con un fade suave
+function changeCharacter(src) {
+    const char = document.getElementById('character');
+    if (!char) return;
+    const duration = TRANSITION_MS - 45; // slightly shorter than scene fade
+
+    if (!src) {
+        // ocultar con fade
+        char.classList.add('fade-hidden');
+        setTimeout(() => { char.style.display = 'none'; }, duration);
+        return;
+    }
+
+    // si ya visible, fade-out -> cambiar src -> fade-in
+    char.classList.add('fade-hidden');
+    setTimeout(() => {
+        char.src = src;
+        char.style.display = 'block';
+        // forzar reflow
+        void char.offsetWidth;
+        char.classList.remove('fade-hidden');
+    }, duration);
+}
+
+// Aplica una transición (fade-out), ejecuta updateFn, y hace fade-in
+function transitionSceneUpdate(updateFn) {
+    const gameEl = document.getElementById('game');
+    const char = document.getElementById('character');
+    const dialogue = document.getElementById('dialogue');
+    const controls = document.getElementById('controls');
+    const choices = document.getElementById('choices');
+    const elems = [gameEl, char, dialogue, controls, choices].filter(Boolean);
+
+    elems.forEach(el => el.classList.add('fade-hidden'));
+
+    setTimeout(() => {
+        try { updateFn(); } catch (e) { console.error(e); }
+
+        setTimeout(() => {
+            elems.forEach(el => el.classList.remove('fade-hidden'));
+            adjustLayoutForMobile();
+            adjustControlsPosition();
+        }, 30);
+    }, TRANSITION_MS);
+}
 function interrogar(index) {
     const p = personajes[index];
     const controls = document.getElementById('controls');
@@ -170,47 +299,61 @@ function interrogar(index) {
     const nameEl = document.getElementById('name');
     const textEl = document.getElementById('text');
 
-    // mostrar personaje y nombre
-    if (p.imagen) { char.src = p.imagen; char.style.display = 'block'; }
-    nameEl.textContent = p.nombre;
-    textEl.textContent = '';
+    // Hacer una transición completa entre interrogaciones
+    transitionSceneUpdate(() => {
+        // aplicar fondo del personaje si existe, si no usar fondo de la escena actual
+        const gameEl = document.getElementById('game');
+        if (p.fondo && gameEl) {
+            gameEl.style.backgroundImage = `url(${p.fondo})`;
+        } else if (gameEl && escenas[currentScene] && escenas[currentScene].fondo) {
+            gameEl.style.backgroundImage = `url(${escenas[currentScene].fondo})`;
+        }
 
-    // listar preguntas como botones dentro de controls
-    if (!controls) return;
-    controls.innerHTML = '';
+        // mostrar personaje y nombre (con transición)
+        if (p.imagen) { changeCharacter(p.imagen); } else { changeCharacter(null); }
+        nameEl.textContent = p.nombre;
+        // cancelar y limpiar texto antes de escribir
+        cancelTyping();
+        textEl.textContent = '';
 
-    if (Array.isArray(p.preguntas) && p.preguntas.length) {
-        p.preguntas.forEach((q, qi) => {
-            const btn = document.createElement('button');
-            btn.textContent = q.pregunta;
-            btn.addEventListener('click', () => {
-                textEl.textContent = q.respuesta;
-                if (q.efecto && typeof q.efecto === 'function') q.efecto();
-                // opcional: destacar botón seleccionado
-                // limpiar selección previa
-                Array.from(controls.querySelectorAll('button')).forEach(b=> b.classList.remove('selected'));
-                btn.classList.add('selected');
+        // listar preguntas como botones dentro de controls
+        if (!controls) return;
+        controls.innerHTML = '';
+
+        if (Array.isArray(p.preguntas) && p.preguntas.length) {
+            p.preguntas.forEach((q, qi) => {
+                const btn = document.createElement('button');
+                btn.textContent = q.pregunta;
+                btn.addEventListener('click', () => {
+                    cancelTyping();
+                    typeWriter(textEl, q.respuesta, 28);
+                    if (q.efecto && typeof q.efecto === 'function') q.efecto();
+                    // opcional: destacar botón seleccionado
+                    // limpiar selección previa
+                    Array.from(controls.querySelectorAll('button')).forEach(b=> b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                });
+                controls.appendChild(btn);
             });
-            controls.appendChild(btn);
+        } else {
+            const msg = document.createElement('div');
+            msg.textContent = 'No hay preguntas disponibles.';
+            msg.style.color = '#ccc';
+            controls.appendChild(msg);
+        }
+
+        // botón volver para restaurar controles principales
+        const btnVolver = document.createElement('button');
+        btnVolver.textContent = 'Volver';
+        btnVolver.addEventListener('click', () => {
+            renderMainControls();
+            // opcional: restaurar texto de la escena actual
         });
-    } else {
-        const msg = document.createElement('div');
-        msg.textContent = 'No hay preguntas disponibles.';
-        msg.style.color = '#ccc';
-        controls.appendChild(msg);
-    }
+        controls.appendChild(btnVolver);
 
-    // botón volver para restaurar controles principales
-    const btnVolver = document.createElement('button');
-    btnVolver.textContent = 'Volver';
-    btnVolver.addEventListener('click', () => {
-        renderMainControls();
-        // opcional: restaurar texto de la escena actual
+        // reajustar posición de controles
+        adjustControlsPosition();
     });
-    controls.appendChild(btnVolver);
-
-    // reajustar posición de controles
-    adjustControlsPosition();
 }
 function elegirCulpable() {
     // Mostrar la lista de acusar dentro de #controls
@@ -222,7 +365,7 @@ function elegirCulpable() {
     personajes.forEach(p => {
         const btn = document.createElement('button');
         btn.textContent = p.nombre;
-        btn.onclick = () => final(p.culpable);
+        btn.onclick = () => mostrarEscena(p.culpable ? 'final_bueno' : 'final_malo');
         controls.appendChild(btn);
     });
 
@@ -304,46 +447,74 @@ function mostrarEscena(id) {
     // si la escena no existe, evitar error y retornar
     if (!e) return;
 
-    // aplicar fondo en el contenedor principal
     const gameEl = document.getElementById("game");
-    if (gameEl) gameEl.style.backgroundImage = `url(${e.fondo})`;
-
     const char = document.getElementById("character");
-    if (e.personaje) {
-        char.src = e.personaje;
-        char.style.display = "block";
-    } else {
-        char.style.display = "none";
-    }
+    const dialogue = document.getElementById('dialogue');
+    const controls = document.getElementById('controls');
+    const choices = document.getElementById('choices');
 
-    document.getElementById("name").textContent = e.nombre;
-    document.getElementById("text").textContent = e.texto;
+    // elementos que queremos fundir (fade)
+    const elems = [gameEl, char, dialogue, controls, choices].filter(Boolean);
 
-    if (e.efecto) e.efecto();
+    // arrancar fade-out
+    elems.forEach(el => el.classList.add('fade-hidden'));
 
-    // ocultar paneles modales cuando mostramos escena principal
-    const scene = document.getElementById("scene");
-    const options = document.getElementById("options");
-    if (scene) scene.style.display = 'none';
-    if (options) options.style.display = 'none';
+    // esperar a que termine el fade-out antes de cambiar contenido
+    setTimeout(() => {
+        // aplicar fondo (preferir fondo del personaje si existe)
+        let bg = e.fondo;
+        const personajeData = personajes.find(p => p.escena === id && p.fondo);
+        if (personajeData && personajeData.fondo) bg = personajeData.fondo;
+        if (gameEl) gameEl.style.backgroundImage = `url(${bg})`;
 
-    const choices = document.getElementById("choices");
-    choices.innerHTML = "";
+        // personaje (usar transición)
+        if (char) {
+            if (e.personaje) changeCharacter(e.personaje);
+            else changeCharacter(null);
+        }
 
-    e.opciones.forEach(op => {
-        const btn = document.createElement("button");
-        btn.textContent = op.texto;
-        btn.onclick = () => mostrarEscena(op.siguiente);
-        // aplicar clase para opciones principales (se verán como botones grandes)
-        btn.classList.add('option-button');
-        choices.appendChild(btn);
-    });
+        // texto y nombre (usar máquina de escribir para el texto)
+        const nameEl = document.getElementById('name');
+        const textEl = document.getElementById('text');
+        if (nameEl) nameEl.textContent = e.nombre;
+        if (textEl) {
+            cancelTyping();
+            typeWriter(textEl, e.texto, 28);
+        }
 
-    // Mostrar botones de Interrogar/Acusar solo si NO es la escena de inicio
-    const controls = document.getElementById("controls");
-    // actualizar escena actual y renderizar controles
-    currentScene = id;
-    renderMainControls();
+        if (e.efecto) e.efecto();
+
+        // ocultar paneles modales cuando mostramos escena principal
+        const sceneModal = document.getElementById('scene');
+        const optionsModal = document.getElementById('options');
+        if (sceneModal) sceneModal.style.display = 'none';
+        if (optionsModal) optionsModal.style.display = 'none';
+
+        // reconstruir opciones
+        if (choices) {
+            choices.innerHTML = '';
+            e.opciones.forEach(op => {
+                const btn = document.createElement('button');
+                btn.textContent = op.texto;
+                btn.onclick = () => mostrarEscena(op.siguiente);
+                btn.classList.add('option-button');
+                choices.appendChild(btn);
+            });
+        }
+
+        // actualizar escena actual y controles
+        currentScene = id;
+        renderMainControls();
+
+        // permitir un pequeño delay para que el DOM se estabilice antes del fade-in
+        setTimeout(() => {
+            elems.forEach(el => el.classList.remove('fade-hidden'));
+            // reajustar layout si es necesario
+            adjustLayoutForMobile();
+            adjustControlsPosition();
+        }, 30);
+
+    }, 360);
 }
 
 window.addEventListener('DOMContentLoaded', () => {

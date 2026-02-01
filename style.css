@@ -41,7 +41,30 @@ button {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: opacity 360ms ease, filter 360ms ease;
 }
+
+/* Utility classes for fading/transitions */
+.fade-hidden { opacity: 0 !important; transform: translateY(6px) scale(0.998); pointer-events: none; }
+.fade-in { opacity: 1; transform: none; }
+
+#character, #dialogue, #controls, .choices {
+    transition: opacity 320ms ease, transform 320ms ease;
+}
+
+/* Typewriter caret */
+.typewriter::after {
+    content: '';
+    display: inline-block;
+    width: 1px;
+    height: 1em;
+    background: #fff;
+    margin-left: 6px;
+    vertical-align: bottom;
+    animation: tw-blink 1s steps(2,end) infinite;
+}
+
+@keyframes tw-blink { to { opacity: 0; } }
 
 #title {
     font-size: 2.5em;
