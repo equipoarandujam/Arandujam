@@ -1,5 +1,368 @@
+       
 
 const escenas = {
+        interrogatorio_monai: {
+            fondo: "img/fondos/fondo_moñai.png",
+            personaje: "img/personajes/moñai_nervioso.png",
+            nombre: "Moñái",
+            texto: "[Interrogar]",
+            opciones: [
+                { texto: "¿Por qué estabas cerca?", siguiente: "respuesta_monai_1" },
+                { texto: "¿Viste algo sospechoso?", siguiente: "respuesta_monai_2" },
+                { texto: "¿Tenés una coartada?", siguiente: "respuesta_monai_3" },
+                { texto: "Terminar interrogatorio", siguiente: "monai_sugiere_luison" }
+            ]
+        },
+        respuesta_monai_1: {
+            fondo: "img/fondos/fondo_moñai.png",
+            personaje: "img/personajes/moñai_nervioso.png",
+            nombre: "Moñái",
+            texto: "Buscaba un remedio yuyo para mi abuela. No tengo nada que ver con eso.",
+            opciones: [
+                { texto: "Volver a interrogar", siguiente: "interrogatorio_monai" }
+            ]
+        },
+        respuesta_monai_2: {
+            fondo: "img/fondos/fondo_moñai.png",
+            personaje: "img/personajes/moñai_nervioso.png",
+            nombre: "Moñái",
+            texto: "Vi a alguien con una capa correr hacia el río, pero no vi su cara.",
+            opciones: [
+                { texto: "Volver a interrogar", siguiente: "interrogatorio_monai" },
+            ]
+        },
+
+        monai_sugiere_luison: {
+            fondo: "img/fondos/fondo_moñai.png",
+            personaje: "img/personajes/moñai.png",
+            nombre: "Moñái",
+            texto: "–¿Por qué no le preguntás a Luisón? Le vi por ahí cerquita también.",
+            opciones: [
+                { texto: "Ir al monte", siguiente: "camino_al_monte" }
+            ]
+        },
+        camino_al_monte: {
+            fondo: "img/fondos/fondo_luison.png",
+            personaje: "img/personajes/luison_sombra.png",
+            nombre: "Narrador",
+            texto: "Te vas adentrando al monte, cada vez la naturaleza se va apoderando de la escena. El sonido de los grillos y otros animales, indistinguibles por la oscuridad, se alzan en unísono en una melodía enigmática, pero vos estás acostumbrado a este ambiente.\n\nLlegaste hasta un claro. En la lejanía escuchás un aullido.",
+            opciones: [
+                { texto: "Avanzar", siguiente: "luison_dialogo" }    
+            ],
+        efecto: function() {
+        if (window._pasosAudio) {
+            window._pasosAudio.pause();
+            window._pasosAudio.currentTime = 0;
+        }
+        window._pasosAudio = new Audio('audio/pasos.mp3');
+        window._pasosAudio.loop = true;
+        window._pasosAudio.volume = 0.7;
+        window._pasosAudio.play().catch(() => {
+            const playOnUserGesture = () => {
+                window._pasosAudio.play();
+                window.removeEventListener('click', playOnUserGesture);
+            };
+            window.addEventListener('click', playOnUserGesture);
+        });
+    }
+        },
+        luison_dialogo: {
+            fondo: "img/fondos/fondo_luison.png",
+            personaje: "img/personajes/luison.png",
+            nombre: "Luisón",
+            texto: "Luisón: – Ha’i, ¿Qué pa vos hacés por acá?",
+            opciones: [
+                { texto: "Siguiente", siguiente: "luison_repuesta_pombero" }
+            ],
+            efecto: function() {
+                if (window._pasosAudio) {
+            window._pasosAudio.pause();
+            window._pasosAudio.currentTime = 0;
+        }
+    }
+        },
+        luison_repuesta_pombero: {
+            fondo: "img/fondos/fondo_luison.png",
+            personaje: "img/personajes/pombero.png",
+            nombre: "Pombero",
+            texto: "Me robaron mis cosas, kape. Me dijeron que vos estabas por ahí.",
+            opciones: [
+                { texto: "Siguiente", siguiente: "luison_dialogo2" }
+            ]
+        },
+        luison_dialogo2: {
+            fondo: "img/fondos/fondo_luison.png",
+            personaje: "img/personajes/luison_enojado.png",
+            nombre: "Luisón",
+            texto: "Ndetavy, desastre la inseguridad en este país.",
+            opciones: [
+                { texto: "Interrogar a Luisón", siguiente: "interrogatorio_luison" }
+            ]
+        },
+        interrogatorio_luison: {
+            fondo: "img/fondos/fondo_luison.png",
+            personaje: "img/personajes/luison_nervioso.png",
+            nombre: "Luisón",
+            texto: "[Interrogar]",
+            opciones: [
+                { texto: "¿Por qué estabas cerca?", siguiente: "respuesta_luison_1" },
+                { texto: "¿Viste algo sospechoso?", siguiente: "respuesta_luison_2" },
+                { texto: "¿Tenés una coartada?", siguiente: "respuesta_luison_3" },
+                { texto: "Terminar interrogatorio", siguiente: "luison_sugiere_malavision" }
+            ]
+        },
+        respuesta_luison_1: {
+            fondo: "img/fondos/fondo_luison.png",
+            personaje: "img/personajes/luison_nervioso.png",
+            nombre: "Luisón",
+            texto: "Me fui al cementerio, sabés luego mi estilo. Quería comer algo.",
+            opciones: [
+                { texto: "Volver a interrogar", siguiente: "interrogatorio_luison" }
+            ]
+        },
+        respuesta_luison_2: {
+            fondo: "img/fondos/fondo_luison.png",
+            personaje: "img/personajes/luison_nervioso.png",
+            nombre: "Luisón",
+            texto: "Le vi a alguien, parecía una persona de poca estatura. Pero tenía una máscara. Pensé que era un chespi y no le di importancia.",
+            opciones: [
+                { texto: "Volver a interrogar", siguiente: "interrogatorio_luison" }
+            ]
+        },
+        respuesta_luison_3: {
+            fondo: "img/fondos/fondo_luison.png",
+            personaje: "img/personajes/luison_nervioso.png",
+            nombre: "Luisón",
+            texto: "El tipo del cementerio es mi kape, a él le podés preguntar si querés. Le saludé cuando entré.",
+            opciones: [
+                { texto: "Volver a interrogar", siguiente: "interrogatorio_luison" }
+            ]
+        },
+        luison_sugiere_malavision: {
+            fondo: "img/fondos/fondo_luison.png",
+            personaje: "img/personajes/luison.png",
+            nombre: "Luisón",
+            texto: "Pero podés preguntarle a Mala visión, cuando me iba le vi por el camino.",
+            opciones: [
+                { texto: "Buscar a Mala visión", siguiente: "camino_malavision" }
+            ]
+        },
+        camino_malavision: {
+            fondo: "img/fondos/fondo_malavision.png",
+            personaje: "img/personajes/malavision_sombra.png",
+            nombre: "narrador",
+            texto: "Te apartas un poco del bosque, llegando a un camino. Caminás un tramo que parece eterno hasta que una luz se ve a la distancia. A medida que te acercas, aquello parece tomar forma, pero…¿Será una persona o un árbol? ",
+            opciones: [
+                { texto: "Acercarce", siguiente: "malavision_encuentro" }
+            ]
+        },
+         // Escenas de Malavisión
+        malavision_encuentro: {
+            fondo: "img/fondos/fondo_malavision.png",
+            personaje: "img/personajes/malavision.png",
+            nombre: "Malavisión",
+            texto: "– ¡Uy, kore! Me asustaste todito mal. Pensé que era un chespi.",
+            opciones: [
+                { texto: "Siguiente", siguiente: "malavision_pombero_dialogo" }
+            ]
+        },
+        malavision_pombero_dialogo: {
+            fondo: "img/fondos/fondo_malavision.png",
+            personaje: "img/personajes/pombero.png",
+            nombre: "Pombero",
+            texto: "– Estoy buscándole a alguien que me robó toito mis cosas sique.",
+            opciones: [
+                { texto: "Siguiente", siguiente: "malavision_ndis" }
+            ]
+        },
+        malavision_ndis: {
+            fondo: "img/fondos/fondo_malavision.png",
+            personaje: "img/personajes/malavision.png",
+            nombre: "Malavisión",
+            texto: "– Ndis.",
+            opciones: [
+                { texto: "Siguiente", siguiente: "malavision_luison" }
+            ]
+        },
+        malavision_luison: {
+            fondo: "img/fondos/fondo_malavision.png",
+            personaje: "img/personajes/pombero.png",
+            nombre: "Pombero",
+            texto: "– Luison me dijo que te vio por ahí…",
+            opciones: [
+                { texto: "Siguiente", siguiente: "malavision_enojado" }
+            ]
+        },
+        malavision_enojado: {
+            fondo: "img/fondos/fondo_malavision.png",
+            personaje: "img/personajes/malavision_enojado.png",
+            nombre: "Malavisión",
+            texto: "– A la pinta, ko jagua chismoso chera’a.",
+            opciones: [
+                { texto: "Interrogar", siguiente: "interrogatorio_malavision" }
+            ]
+        },
+        interrogatorio_malavision: {
+            fondo: "img/fondos/fondo_malavision.png",
+            personaje: "img/personajes/malavision_enojado.png",
+            nombre: "Pombero",
+            texto: "[Interrogar]",
+            opciones: [
+                { texto: "¿Por qué estabas cerca?", siguiente: "malavision_resp_cerca" },
+                { texto: "¿Viste algo sospechoso?", siguiente: "malavision_resp_sospechoso" },
+                { texto: "¿Tenés una coartada?", siguiente: "malavision_resp_coartada" },
+                { texto: "Terminar interrogatorio", siguiente: "malavision_sugiere_jasy" }
+            ]
+        },
+        malavision_resp_cerca: {
+            fondo: "img/fondos/fondo_malavision.png",
+            personaje: "img/personajes/malavision_enojado.png",
+            nombre: "Malavisión",
+            texto: "Estaba ko esperando mi motogolt. Me iba a verle a mi ñorso, pero el de la moto se asustó y se fue corriendo.",
+            opciones: [
+                { texto: "Volver a interrogar", siguiente: "interrogatorio_malavision" }
+            ]
+        },
+        malavision_resp_sospechoso: {
+            fondo: "img/fondos/fondo_malavision.png",
+            personaje: "img/personajes/malavision_enojado.png",
+            nombre: "Malavisión",
+            texto: "Creo que vi un palo…bastón, tirado por ahí.",
+            opciones: [
+                { texto: "Volver a interrogar", siguiente: "interrogatorio_malavision" }
+            ]
+        },
+        malavision_resp_coartada: {
+            fondo: "img/fondos/fondo_malavision.png",
+            personaje: "img/personajes/malavision_enojado.png",
+            nombre: "Malavisión",
+            texto: "Y si le encontrás al de la moto le pódes pregunta, Tule’i González le dicen.",
+            opciones: [
+                { texto: "Volver a interrogar", siguiente: "interrogatorio_malavision" }
+            ]
+        },
+        malavision_sugiere_jasy: {
+            fondo: "img/fondos/fondo_malavision.png",
+            personaje: "img/personajes/malavision_enojado.png",
+            nombre: "Malavisión",
+            texto: "Sabés a quién tenés que preguntarle, a Jasy Jatere, ese mita’i akahata siempre anda rompiendo las pelotas por ahí.",
+            opciones: [
+                { texto: "Buscar a Jasy Jatere", siguiente: "narrador_jasy_intro" }
+            ]
+        },
+
+        // Escenas de Jasy Jatere
+        narrador_jasy_intro: {
+            fondo: "img/fondos/fondo_jasy.png",
+            personaje: "img/personajes/jasy_sombra.png",
+            nombre: "Narrador",
+            texto: "Vas caminando y te adentras a una parte del monte en la que el pastizal se extiende libremente, evocando la sensación de manos que se alzan desde el suelo para agarrar los cielos.",
+            opciones: [
+                { texto: "Siguiente", siguiente: "narrador_jasy_movimiento" }
+            ]
+        },
+        narrador_jasy_movimiento: {
+            fondo: "img/fondos/fondo_jasy.png",
+            personaje: "img/personajes/jasy_sombra.png",
+            nombre: "Narrador",
+            texto: "Escuchás que algo se mueve entre el pastizal.",
+            opciones: [
+                { texto: "Siguiente", siguiente: "jasy_saludo" }
+            ]
+        },
+        jasy_saludo: {
+            fondo: "img/fondos/fondo_jasy.png",
+            personaje: "img/personajes/jasy.png",
+            nombre: "JasyJatere",
+            texto: "–Hola, rey, ¿Qué hacés por acá, boludo?",
+            opciones: [
+                { texto: "Siguiente", siguiente: "pombero_explica_jasy" }
+            ]
+        },
+        pombero_explica_jasy: {
+            fondo: "img/fondos/fondo_jasy.png",
+            personaje: "img/personajes/pombero.png",
+            nombre: "Pombero",
+            texto: "–Alguien con una máscara me robó mis cosas y le estoy buscando, ¿Vos no sabés nada?",
+            opciones: [
+                { texto: "Siguiente", siguiente: "jasy_sorprendido" }
+            ]
+        },
+        jasy_sorprendido: {
+            fondo: "img/fondos/fondo_jasy.png",
+            personaje: "img/personajes/jasy_sorprendido.png",
+            nombre: "JasyJatere",
+            texto: "–Ehh.. No sé nada rey, yo estaba recorriendo mi chacra",
+            opciones: [
+                { texto: "Interrogar", siguiente: "interrogatorio_jasy" }
+            ]
+        },
+        interrogatorio_jasy: {
+            fondo: "img/fondos/fondo_jasy.png",
+            personaje: "img/personajes/jasy_nervioso.png",
+            nombre: "JasyJatere",
+            texto: "[Interrogar]",
+            opciones: [
+                { texto: "¿Viste algo sospechoso?", siguiente: "jasy_resp_sospechoso" },
+                { texto: "¿Por qué estabas cerca?", siguiente: "jasy_resp_cerca" },
+                { texto: "¿Tenés una coartada?", siguiente: "jasy_resp_coartada" },
+                { texto: "Acusar", siguiente: "acusar" }
+            ]
+        },
+        jasy_resp_sospechoso: {
+            fondo: "img/fondos/fondo_jasy.png",
+            personaje: "img/personajes/jasy_nervioso.png",
+            nombre: "JasyJatere",
+            texto: "Ehh.. Legalemente no ami, yo vi que Luison anda de malas tambien",
+            opciones: [
+                { texto: "Volver a interrogar", siguiente: "interrogatorio_jasy" }
+            ]
+        },
+        jasy_resp_cerca: {
+            fondo: "img/fondos/fondo_jasy.png",
+            personaje: "img/personajes/jasy_nervioso.png",
+            nombre: "JasyJatere",
+            texto: "Y ya te dije, boludo, estaba vapeando con una minita.",
+            opciones: [
+                { texto: "Volver a interrogar", siguiente: "interrogatorio_jasy" }
+            ]
+        },
+        jasy_resp_coartada: {
+            fondo: "img/fondos/fondo_jasy.png",
+            personaje: "img/personajes/jasy_nervioso.png",
+            nombre: "JasyJatere",
+            texto: "Confía nomas en lo que te digo ami.",
+            opciones: [
+                { texto: "Volver a interrogar", siguiente: "interrogatorio_jasy" }
+            ]
+        },
+        respuesta_monai_3: {
+            fondo: "img/fondos/fondo_moñai.png",
+            personaje: "img/personajes/moñai_nervioso.png",
+            nombre: "Moñái",
+            texto: "Mi vecino me vio pasar por su patio. Él puede confirmar.",
+            opciones: [
+                { texto: "Volver a interrogar", siguiente: "interrogatorio_monai" }
+            ]
+        },
+        escena_interrogatorio: {
+            fondo: "img/fondos/fondo_moñai.png",
+            personaje: "img/personajes/pombero.png",
+            nombre: "Pombero",
+            texto: "Mmm, así pio luego. Me robaron ko mis cosas.",
+            opciones: [
+                { texto: "Siguiente", siguiente: "escena_interrogatorio2" }
+            ]
+        },
+        escena_interrogatorio2: {
+            fondo: "img/fondos/fondo_moñai.png",
+            personaje: "img/personajes/moñai_enojado.png",
+            nombre: "Moñái",
+            texto: "¿Y qué pio yo tengo que ver con eso?",
+            opciones: [
+                { texto: "Interrogar a Moñái", siguiente: "interrogatorio_monai" }
+            ]
+        },
     "1am_cerro_yaguaron": {
         fondo: "img/fondos/estanque.png", // Asegúrate de que la imagen exista
         personaje: "",
@@ -11,7 +374,7 @@ const escenas = {
     },
     pombero_sorprendido: {
         fondo: "img/fondos/estanque.png", // O el fondo que prefieras
-        personaje: "img/personajes/pombero_sorprendido.png", // Asegúrate de que la imagen exista
+        personaje: "img/personajes/pombero.png", // Asegúrate de que la imagen exista
         nombre: "Pombero",
         texto: "–¿Qué pasó acá?\n–De seguro esos ñembotavy ya otra vez me están rompiendo las bolas, voy a ir a hablar con ellos.",
         opciones: [
@@ -21,12 +384,28 @@ const escenas = {
 
     escena_perros_montes: {
         fondo: "img/fondos/fondo_monte.png", // Cambia el fondo si tienes uno específico
-        personaje: "",
+        personaje: "img/personajes/moñai_sombra.png",
         nombre: "Narrador",
         texto: "De repente escuchás perros ladrando a lo lejos, donde hay algunas casas casi al final del monte, al dar la vuelta para curiosear, podés ver algo que brilla, como una luz o un reflejo, así que decidís ir hacia ahí.",
         opciones: [
             { texto: "Acercarse", siguiente: "moñai_dialogo" }
-        ]
+        ],
+        efecto: function() {
+        if (window._pasosAudio) {
+            window._pasosAudio.pause();
+            window._pasosAudio.currentTime = 0;
+        }
+        window._pasosAudio = new Audio('audio/Ladridos.mp3');
+        window._pasosAudio.loop = true;
+        window._pasosAudio.volume = 0.7;
+        window._pasosAudio.play().catch(() => {
+            const playOnUserGesture = () => {
+                window._pasosAudio.play();
+                window.removeEventListener('click', playOnUserGesture);
+            };
+            window.addEventListener('click', playOnUserGesture);
+        });
+    }
     },
 
     moñai_dialogo: {
@@ -35,27 +414,14 @@ const escenas = {
         nombre: "Moñái",
         texto: "–Por vos hina ladran ya otra vez los perros, yo quería saber por donde ya otra vez andabas, algo te pasó por eso venís hacia acá ¿Qué querés?",
         opciones: [
-            { texto: "Responder", siguiente: "inicio" }
-        ]
-    },
-    inicio: {
-        fondo: "img/fondos/fondo.jpg",
-        personaje: "",
-        nombre: "",
-        texto: "Un objeto valioso ha sido robado...",
-        opciones: [
-            { texto: "QUIEN TOMO MI CAÑA", siguiente: "investigacion" }
-        ]
-    },
-
-    investigacion: {
-        fondo: "img/fondos/fondo.jpg",
-        personaje: "",
-        nombre: "",
-        texto: "Empezás a recorrer la zona en busca de pistas. Nadie aparece todavía.",
-        opciones: [
-            
-        ]
+            { texto: "Responder", siguiente: "escena_interrogatorio" }
+        ],
+        efecto: function() {
+        if (window._pasosAudio) {
+            window._pasosAudio.pause();
+            window._pasosAudio.currentTime = 0;
+        }
+    }
     },
 
     acusar: {
@@ -64,65 +430,121 @@ const escenas = {
         nombre: "",
         texto: "¿A quién acusar?",
         opciones: [
-            { texto: "Ana", siguiente: "final_malo" },
-            { texto: "Carlos", siguiente: "final_bueno" }
+            { texto: "Acusar a Jasy Jatere", siguiente: "acusar_jasy" },
+            { texto: "Acusar a Moñái", siguiente: "final_malo_moñai" },
+            { texto: "Acusar a Malavisión", siguiente: "final_malo_malavision" },
+            { texto: "Acusar a Luisón", siguiente: "final_malo_luison" }
         ]
     },
 
-    final_bueno: {
-            fondo: "img/fondos/final_bueno.png",
-            personaje: "",
-            nombre: "Final",
-            texto: "Atrapaste al ladrón. El misterio fue resuelto.",
-            opciones: []
+    acusar_jasy: {
+        fondo: "img/fondos/fondo_jasy.png",
+        personaje: "img/personajes/jasy.png",
+        nombre: "JasyJatere",
+        texto: "Mmm, chore chera’a, yo ko keria probar nomás.",
+        opciones: [
+            { texto: "Siguiente", siguiente: "jasy_asadito" }
+        ]
     },
-
+    jasy_asadito: {
+        fondo: "img/fondos/fondo_jasy.png",
+        personaje: "img/personajes/jasy.png",
+        nombre: "JasyJatere",
+        texto: "Aninati nde pochy, chamigo, jahata ja'u asadito por 10 mil Ña Pochope.",
+        opciones: [
+            { texto: "Mbore, ahoraite dame mis cosas.", siguiente: "final_bueno" },
+            { texto: "Dale, ja’u.", siguiente: "final_bueno" },
+            { texto: "¡Nderakore ojeroky pio la nde asadito!", siguiente: "final_bueno" },
+            { texto: "¡Por 10 mil no me vas a llevar!", siguiente: "final_bueno" }
+        ]
+    },
+    final_bueno: {
+        fondo: "img/fondos/fondo_bueno.png",
+        personaje: "img/personajes/jasy.png",
+        nombre: "Final",
+        texto: "ENCONTRASTE AL LADRÓN",
+        opciones: [
+            { texto: "Creditos", siguiente: "creditos" }
+        ]
+    },
+    final_malo_moñai: {
+        fondo: "img/fondos/fondo_malo.png",
+        personaje: "img/personajes/moñai_enojado.png",
+        nombre: "Final",
+        texto: "– MMM, no confias luego en lo que te digo, despues vas a ver que no era yo",
+        opciones: [
+            { texto: "Siguiente", siguiente: "final_malo" }
+        ]
+    },
+    final_malo_malavision: {
+        fondo: "img/fondos/final_malo.png",
+        personaje: "img/personajes/malavision_enojado.png",
+        nombre: "Final",
+        texto: "– MMM, no confias luego en lo que te digo, despues vas a ver que no era yo",
+        opciones: [
+            { texto: "Siguiente", siguiente: "final_malo" }
+        ]
+    },
+    final_malo_luison: {
+        fondo: "img/fondos/final_malo.png",
+        personaje: "img/personajes/luison_enojado.png",
+        nombre: "Final",
+        texto: " MMM, no confias luego en lo que te digo, despues vas a ver que no era yo",
+        opciones: [
+            { texto: "Siguiente", siguiente: "final_malo" }
+        ]
+    },
     final_malo: {
-            fondo: "img/fondos/final_malo.png",
+        fondo: "img/fondos/fondo_malo.png",
+        personaje: "img/personajes/pombero.png",
+        nombre: "Final",
+        texto: "Haso kp no era ra'e",
+        opciones: [
+            { texto: "Creditos", siguiente: "creditos" }
+        ]
+    },
+     creditos: {
+            fondo: "img/fondos/fondo.jpg",
             personaje: "",
-            nombre: "Final",
-            texto: "El objeto aparece... vacío. Te equivocaste de acusado.",
-            opciones: []
-    }
+            nombre: "Créditos",
+            texto: "Juego realizado por [AranduTeam](Artistas, Escritores)Samunator, batzeiliris, A-r-i, It's a me Chino, Toki. (Musica y Ambientación) Gáryth-Moll. (Programadores)Fernando10104¡Gracias por jugar!",
+            opciones: [
+                { texto: "Volver al inicio", siguiente: "1am_cerro_yaguaron" }
+            ]
+        },
+
 };
 // Lista de personajes disponible globalmente
 const personajes = [
     { 
         nombre: "Luisón", 
         fondo: "img/fondos/fondo_luison.png",
-        imagen: "img/personajes/personaje1.png", 
+        imagen: "img/personajes/luison.png", 
         pista: "", 
         culpable: false, 
         escena: "luison",
         preguntas: [
-            { pregunta: "¿Dónde estabas la noche del robo?", respuesta: "Estaba en mi casa, con mi familia. No vi nada raro.", efecto: () => { if (typeof estado !== 'undefined') estado.interrogaronLuison = true; } },
-            { pregunta: "¿Viste a alguien cerca?", respuesta: "Vi a Malavisión por la plaza esa noche.", efecto: null }
         ]
     },
     { 
         
         nombre: "Malavisión",
         fondo: "img/fondos/fondo_malavision.png", 
-        imagen: "img/personajes/personaje2.png", 
+        imagen: "img/personajes/malavision.png", 
         pista: "", 
-        culpable: true, 
+        culpable: false, 
         escena: "malavision",
         preguntas: [
-            { pregunta: "¿Qué hacías allí?", respuesta: "Solo pasaba por la zona, no me metí en nada.", efecto: () => { if (typeof estado !== 'undefined') estado.interrogaronMalavision = true; } },
-            { pregunta: "¿Conoces al dueño del objeto?", respuesta: "No, nunca lo vi antes.", efecto: null }
         ]
     },
     {
         nombre: "Moñai",
         fondo: "img/fondos/fondo_moñai.png",
-        imagen: "img/personajes/personaje3.png",
+        imagen: "img/personajes/moñai.png",
         pista: "",
         culpable: false,
         escena: "moñai",
         preguntas: [
-            { pregunta: "¿Por qué estabas en ese lugar?", respuesta: "Buscaba una planta medicinal para mi abuela; no tenía nada que ver con eso.", efecto: () => { if (typeof estado !== 'undefined') estado.interrogaronMonai = true; } },
-            { pregunta: "¿Viste algo sospechoso?", respuesta: "Vi a alguien con una capa correr hacia el río, pero no distingo rostros.", efecto: null },
-            { pregunta: "¿Tienes una coartada?", respuesta: "Mi vecino me vio pasar por su patio; él puede confirmarlo.", efecto: null }
         ]
     },
     {
@@ -133,9 +555,7 @@ const personajes = [
         culpable: false,
         escena: "jasyjatere",
         preguntas: [
-            { pregunta: "¿Por qué estabas en ese lugar?", respuesta: "Buscaba una planta medicinal para mi abuela; no tenía nada que ver con eso.", efecto: () => { if (typeof estado !== 'undefined') estado.interrogaronMonai = true; } },
-            { pregunta: "¿Viste algo sospechoso?", respuesta: "Vi a alguien con una capa correr hacia el río, pero no distingo rostros.", efecto: null },
-            { pregunta: "¿Tienes una coartada?", respuesta: "Mi vecino me vio pasar por su patio; él puede confirmarlo.", efecto: null }
+           
         ]
     },
 ];
@@ -179,7 +599,7 @@ function playTypeSound() {
         const osc = _audioCtx.createOscillator();
         const gain = _audioCtx.createGain();
         osc.type = 'square';
-        osc.frequency.value = 320 + Math.random() * 120; // slight variation
+        osc.frequency.value = 300 + Math.random() * 150; // slight variation
         gain.gain.setValueAtTime(0.001, now);
         gain.gain.linearRampToValueAtTime(0.03, now + 0.001);
         gain.gain.linearRampToValueAtTime(0.001, now + 0.04);
@@ -222,13 +642,9 @@ function typeWriter(el, text, speed = 20, callback) {
 function renderMainControls() {
     const controls = document.getElementById('controls');
     if (!controls) return;
-    // Si es una escena final, mostrar solo Reiniciar
+    // Si es una escena final, no mostrar controles
     if (currentScene && (currentScene === 'final_bueno' || currentScene === 'final_malo' || currentScene.startsWith('final'))) {
-        controls.innerHTML = `
-            <button id="btnReiniciar">Reiniciar</button>
-        `;
-        const btnR = document.getElementById('btnReiniciar');
-        if (btnR) btnR.addEventListener('click', () => mostrarEscena('inicio'));
+        controls.innerHTML = '';
         return;
     }
 

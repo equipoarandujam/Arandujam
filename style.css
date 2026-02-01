@@ -103,7 +103,7 @@ h1 {
     border-radius: 6px;
     text-align: left;
     font-size: 1.05em;
-    font-weight: 400;
+    font-weight: 200;
     text-transform: uppercase;
     letter-spacing: 0.6px;
     line-height: 1.35;
@@ -129,11 +129,16 @@ h1 {
     font-weight: 400;
     margin-bottom: 6px;
     text-shadow: 0 0 4px #000;
+    font-family: 'Punkland', Impact, Arial, sans-serif;
+    letter-spacing: 1.2px;
+    font-size: 1.25em;
 }
 
 #text {
     word-wrap: break-word;
     line-height: 1.4;
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: 1.08em;
 }
 
 .choices {
