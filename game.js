@@ -299,7 +299,7 @@ const escenas = {
         },
         interrogatorio_jasy: {
             fondo: "img/fondos/fondo_jasy.png",
-            personaje: "img/personajes/jasy_nervioso.png",
+            personaje: "img/personajes/Jasy_nervioso.png",
             nombre: "JasyJatere",
             texto: "[Interrogar]",
             opciones: [
@@ -311,7 +311,7 @@ const escenas = {
         },
         jasy_resp_sospechoso: {
             fondo: "img/fondos/fondo_jasy.png",
-            personaje: "img/personajes/jasy_nervioso.png",
+            personaje: "img/personajes/Jasy_nervioso.png",
             nombre: "JasyJatere",
             texto: "Ehh.. Legalemente no ami, yo vi que Luison anda de malas tambien",
             opciones: [
@@ -320,7 +320,7 @@ const escenas = {
         },
         jasy_resp_cerca: {
             fondo: "img/fondos/fondo_jasy.png",
-            personaje: "img/personajes/jasy_nervioso.png",
+            personaje: "img/personajes/Jasy_nervioso.png",
             nombre: "JasyJatere",
             texto: "Y ya te dije, boludo, estaba vapeando con una minita.",
             opciones: [
@@ -329,7 +329,7 @@ const escenas = {
         },
         jasy_resp_coartada: {
             fondo: "img/fondos/fondo_jasy.png",
-            personaje: "img/personajes/jasy_nervioso.png",
+            personaje: "img/personajes/Jasy_nervioso.png",
             nombre: "JasyJatere",
             texto: "Confía nomas en lo que te digo ami.",
             opciones: [
